@@ -1,7 +1,8 @@
 const express = require("express");
+const usersController = require("./controllers/usersController");
 
 const router = express.Router();
 
-// router.get("/", (req, res) => res.status(200).send("O router está on"));
+router.get("/users", usersController.getAll);
 
 module.exports = router;
