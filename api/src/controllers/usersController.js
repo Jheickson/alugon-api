@@ -1,8 +1,8 @@
-const usersModel = require("../models/usersModel");
+const userModel = require("../models/usersModel"); // CORRETO ✅
 
 const getAll = async (request, response) => {
-  const users = await usersModel.getAll();
-  return response.status(500).json(users);
+  const users = await userModel.getAll();
+  return response.status(200).json(users);
 };
 
 module.exports = {
