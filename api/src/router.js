@@ -1,8 +1,54 @@
 const express = require("express");
+
 const usersController = require("./controllers/usersController");
+const spaceController = require("./controllers/spaceController");
+const rentalController = require("./controllers/rentalController");
+const contractController = require("./controllers/contractController");
+const paymentController = require("./controllers/paymentController");
+const invoiceController = require("./controllers/invoiceController");
 
 const router = express.Router();
 
+// Users
 router.get("/users", usersController.getAll);
+router.get("/users/:id", usersController.getById);
+router.post("/users", usersController.create);
+router.put("/users/:id", usersController.update);
+router.delete("/users/:id", usersController.remove);
+
+// Spaces
+router.get("/spaces", spaceController.getAll);
+router.get("/spaces/:id", spaceController.getById);
+router.post("/spaces", spaceController.create);
+router.put("/spaces/:id", spaceController.update);
+router.delete("/spaces/:id", spaceController.remove);
+
+// Rentals
+router.get("/rentals", rentalController.getAll);
+router.get("/rentals/:id", rentalController.getById);
+router.post("/rentals", rentalController.create);
+router.put("/rentals/:id", rentalController.update);
+router.delete("/rentals/:id", rentalController.remove);
+
+// Contracts
+router.get("/contracts", contractController.getAll);
+router.get("/contracts/:id", contractController.getById);
+router.post("/contracts", contractController.create);
+router.put("/contracts/:id", contractController.update);
+router.delete("/contracts/:id", contractController.remove);
+
+// Payments
+router.get("/payments", paymentController.getAll);
+router.get("/payments/:id", paymentController.getById);
+router.post("/payments", paymentController.create);
+router.put("/payments/:id", paymentController.update);
+router.delete("/payments/:id", paymentController.remove);
+
+// Invoices
+router.get("/invoices", invoiceController.getAll);
+router.get("/invoices/:id", invoiceController.getById);
+router.post("/invoices", invoiceController.create);
+router.put("/invoices/:id", invoiceController.update);
+router.delete("/invoices/:id", invoiceController.remove);
 
 module.exports = router;
