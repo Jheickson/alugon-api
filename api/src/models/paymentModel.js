@@ -8,8 +8,15 @@ const getAll = async () => {
 
 // Buscar pagamento por ID
 const getById = async (id) => {
-  const [rows] = await pool.query("SELECT * FROM pagamento WHERE id = ?", [id]);
-  return rows[0] || null;
+  try {
+    const [rows] = await pool.query("SELECT * FROM pagamento WHERE id = ?", [
+      id,
+    ]);
+    return rows[0] || null;
+  } catch (error) {
+    console.error("Erro na query getById:", error); // Log para identificar erros
+    throw error;
+  }
 };
 
 // Criar novo pagamento
