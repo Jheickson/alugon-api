@@ -34,13 +34,13 @@ const remove = async (id) => {
 
 // Buscar usuário por ID
 const getById = async (id) => {
-  const [[user]] = await connection.query(
-    "SELECT * FROM usuario WHERE id = ?",
-    [id]
-  );
-  return user || null;
+  try {
+    const [rows] = await pool.query("SELECT * FROM usuario WHERE id = ?", [id]);
+    return rows[0] || null;
+  } catch (error) {
+    console.error("Erro na query getById:", error); // Log para identificar erros
+    throw error;
+  }
 };
 
-module.exports = {
-  getAll,
-};
+module.exports = { getAll, create, update, remove, getById };
