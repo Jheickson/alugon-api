@@ -1,11 +1,11 @@
 const express = require("express");
 
 const usersController = require("./controllers/usersController");
-const spaceController = require("./controllers/spaceController");
-const rentalController = require("./controllers/rentalController");
-const contractController = require("./controllers/contractController");
-const paymentController = require("./controllers/paymentController");
-const invoiceController = require("./controllers/invoiceController");
+const spacesController = require("./controllers/spacesController");
+const rentalController = require("./controllers/rentalsController");
+const contractController = require("./controllers/contractsController");
+const paymentController = require("./controllers/paymentsController");
+const invoiceController = require("./controllers/invoicesController");
 
 const router = express.Router();
 
@@ -17,11 +17,11 @@ router.put("/users/:id", usersController.update);
 router.delete("/users/:id", usersController.remove);
 
 // Spaces
-router.get("/spaces", spaceController.getAll);
-router.get("/spaces/:id", spaceController.getById);
-router.post("/spaces", spaceController.create);
-router.put("/spaces/:id", spaceController.update);
-router.delete("/spaces/:id", spaceController.remove);
+router.get("/spaces", spacesController.getAll);
+router.get("/spaces/:id", spacesController.getById);
+router.post("/spaces", spacesController.create);
+router.put("/spaces/:id", spacesController.update);
+router.delete("/spaces/:id", spacesController.remove);
 
 // Rentals
 router.get("/rentals", rentalController.getAll);

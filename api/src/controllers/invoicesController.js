@@ -1,9 +1,9 @@
-const invoiceModel = require("../models/invoiceModel");
+const invoicesModel = require("../models/invoicesModel");
 
 // Listar todas as faturas
 const getAll = async (req, res) => {
   try {
-    const invoices = await invoiceModel.getAll();
+    const invoices = await invoicesModel.getAll();
     res.status(200).json(invoices);
   } catch (error) {
     console.error("Erro ao buscar faturas:", error);
@@ -14,7 +14,7 @@ const getAll = async (req, res) => {
 // Buscar fatura por ID
 const getById = async (req, res) => {
   try {
-    const invoice = await invoiceModel.getById(req.params.id);
+    const invoice = await invoicesModel.getById(req.params.id);
     if (!invoice) {
       return res.status(404).json({ error: "Fatura não encontrada." });
     }
@@ -28,7 +28,7 @@ const getById = async (req, res) => {
 // Criar uma nova fatura
 const create = async (req, res) => {
   try {
-    const newInvoice = await invoiceModel.create(req.body);
+    const newInvoice = await invoicesModel.create(req.body);
     res.status(201).json(newInvoice);
   } catch (error) {
     console.error("Erro ao criar fatura:", error);
@@ -39,7 +39,7 @@ const create = async (req, res) => {
 // Atualizar uma fatura
 const update = async (req, res) => {
   try {
-    const updated = await invoiceModel.update(req.params.id, req.body);
+    const updated = await invoicesModel.update(req.params.id, req.body);
     if (!updated) {
       return res.status(404).json({ error: "Fatura não encontrada." });
     }
@@ -53,7 +53,7 @@ const update = async (req, res) => {
 // Deletar uma fatura
 const remove = async (req, res) => {
   try {
-    const deleted = await invoiceModel.remove(req.params.id);
+    const deleted = await invoicesModel.remove(req.params.id);
     if (!deleted) {
       return res.status(404).json({ error: "Fatura não encontrada." });
     }

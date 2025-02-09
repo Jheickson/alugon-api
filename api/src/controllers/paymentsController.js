@@ -1,9 +1,9 @@
-const paymentModel = require("../models/paymentModel");
+const paymentsModel = require("../models/paymentsModel");
 
 // Listar todos os pagamentos
 const getAll = async (req, res) => {
   try {
-    const payments = await paymentModel.getAll();
+    const payments = await paymentsModel.getAll();
     res.status(200).json(payments);
   } catch (error) {
     console.error("Erro ao buscar pagamentos:", error);
@@ -14,7 +14,7 @@ const getAll = async (req, res) => {
 // Buscar pagamento por ID
 const getById = async (req, res) => {
   try {
-    const payment = await paymentModel.getById(req.params.id);
+    const payment = await paymentsModel.getById(req.params.id);
     if (!payment) {
       return res.status(404).json({ error: "Pagamento não encontrado." });
     }
@@ -28,7 +28,7 @@ const getById = async (req, res) => {
 // Criar um novo pagamento
 const create = async (req, res) => {
   try {
-    const newPayment = await paymentModel.create(req.body);
+    const newPayment = await paymentsModel.create(req.body);
     res.status(201).json(newPayment);
   } catch (error) {
     console.error("Erro ao criar pagamento:", error);
@@ -39,7 +39,7 @@ const create = async (req, res) => {
 // Atualizar um pagamento
 const update = async (req, res) => {
   try {
-    const updated = await paymentModel.update(req.params.id, req.body);
+    const updated = await paymentsModel.update(req.params.id, req.body);
     if (!updated) {
       return res.status(404).json({ error: "Pagamento não encontrado." });
     }
@@ -53,7 +53,7 @@ const update = async (req, res) => {
 // Deletar um pagamento
 const remove = async (req, res) => {
   try {
-    const deleted = await paymentModel.remove(req.params.id);
+    const deleted = await paymentsModel.remove(req.params.id);
     if (!deleted) {
       return res.status(404).json({ error: "Pagamento não encontrado." });
     }
