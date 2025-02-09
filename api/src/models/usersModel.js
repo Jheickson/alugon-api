@@ -6,12 +6,6 @@ const getAll = async () => {
   return rows;
 };
 
-// Buscar usuário por ID
-const getById = async (id) => {
-  const [rows] = await pool.query("SELECT * FROM usuario WHERE id = ?", [id]);
-  return rows[0] || null;
-};
-
 // Criar novo usuário
 const create = async (usuario) => {
   const { CPF, nome, data_nascimento, telefone, email, senha } = usuario;
@@ -38,6 +32,7 @@ const remove = async (id) => {
   return result.affectedRows > 0;
 };
 
+// Buscar usuário por ID
 const getById = async (id) => {
   const [[user]] = await connection.query(
     "SELECT * FROM usuario WHERE id = ?",
