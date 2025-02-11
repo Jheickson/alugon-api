@@ -17,3 +17,4 @@ Aqui ficara a API que fara a conexão do FrontEnd com o BackEnd
 
 #Notas importantes
 05/02/2025 - Não foi possivel concluir todas as rotas na branch main (na branch conexão-db está sendo realizado alguns teste para fazer funcionar todas as rotas)
+10/02/2025 - Com base no nosso banco de dados atual, as rotas estão completas.
