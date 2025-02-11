@@ -1,5 +1,36 @@
 const { parseISO, isFuture, isValid } = require("date-fns"); // Biblioteca útil para manipulação de datas
 const usersModel = require("../models/usersModel");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+const login = async (req, res) => {
+  const email = req.body.email;
+  const password = req.body.senha;
+  try {
+    console.log("entrou");
+    const user = await usersModel.getByEmail(email);
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado!" });
+    }
+    const senhaHash = await bcrypt.hash(user.senha, 10);
+    console.log(senhaHash);
+    console.log(password);
+    const validPassword = await bcrypt.compare(password, senhaHash);
+    console.log(validPassword)
+    if (!validPassword) {
+      return res.status(401).json({ error: "Senha incorreta!" });
+    }
+
+    const token = jwt.sign({ id: user.id, email: user.email }, "secret_key", { expiresIn: "1h" });
+    console.log(token);
+    res.status(200).json({ token });
+  
+  } catch (error) {
+    
+    console.log(error)
+    res.status(500).json({ error: "Erro no servidor!" });
+  }
+};
 
 // Listar todos os usuários
 const getAll = async (req, res) => {
@@ -98,4 +129,4 @@ const remove = async (req, res) => {
   }
 };
 
-module.exports = { getAll, getById, create, update, remove };
+module.exports = { getAll, getById, create, update, remove, login };

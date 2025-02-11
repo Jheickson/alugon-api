@@ -1,4 +1,10 @@
 const pool = require("./connection");
+const bcrypt = require("bcryptjs")
+
+const getByEmail = async (email) => {
+  const [rows] = await pool.query("SELECT * FROM usuario WHERE email = ?", [email]);
+  return rows[0] || null;
+};
 
 // Buscar todos os usuários
 const getAll = async () => {
@@ -9,6 +15,7 @@ const getAll = async () => {
 // Criar novo usuário
 const create = async (usuario) => {
   const { CPF, nome, data_nascimento, telefone, email, senha } = usuario;
+  usuario.senha =  await bcrypt.hash(usuario.senha, 10);
   const [result] = await pool.query(
     "INSERT INTO usuario (CPF, nome, data_nascimento, telefone, email, senha) VALUES (?, ?, ?, ?, ?, ?)",
     [CPF, nome, data_nascimento, telefone, email, senha]
@@ -19,6 +26,7 @@ const create = async (usuario) => {
 // Atualizar usuário por ID
 const update = async (id, usuario) => {
   const { CPF, nome, data_nascimento, telefone, email, senha } = usuario;
+  usuario.senha = await bcrypt.hash(usuario.senha, 10);
   const [result] = await pool.query(
     "UPDATE usuario SET CPF = ?, nome = ?, data_nascimento = ?, telefone = ?, email = ?, senha = ? WHERE id = ?",
     [CPF, nome, data_nascimento, telefone, email, senha, id]
@@ -43,4 +51,4 @@ const getById = async (id) => {
   }
 };
 
-module.exports = { getAll, create, update, remove, getById };
+module.exports = { getAll, create, update, remove, getById, getByEmail };

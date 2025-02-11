@@ -50,5 +50,6 @@ router.get("/invoices/:id", invoiceController.getById);
 router.post("/invoices", invoiceController.create);
 router.put("/invoices/:id", invoiceController.update);
 router.delete("/invoices/:id", invoiceController.remove);
+router.post("/login", usersController.login);
 
 module.exports = router;
