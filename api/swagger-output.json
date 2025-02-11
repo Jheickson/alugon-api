@@ -7,12 +7,19 @@
   },
   "host": "localhost:3333",
   "basePath": "/",
-  "schemes": [
-    "http"
+  "schemes": ["http"],
+  "tags": [
+    { "name": "Usuários", "description": "Operações relacionadas a usuários" },
+    { "name": "Espaços", "description": "Operações relacionadas a espaços" },
+    { "name": "Aluguéis", "description": "Gerenciamento de aluguéis" },
+    { "name": "Contratos", "description": "Gerenciamento de contratos" },
+    { "name": "Pagamentos", "description": "Gerenciamento de pagamentos" },
+    { "name": "Faturas", "description": "Gerenciamento de faturas" }
   ],
   "paths": {
     "/users": {
       "get": {
+        "tags": ["Usuários"],
         "description": "",
         "responses": {
           "200": {
@@ -24,6 +31,7 @@
         }
       },
       "post": {
+        "tags": ["Usuários"],
         "description": "",
         "parameters": [
           {
@@ -69,6 +77,7 @@
     },
     "/users/{id}": {
       "get": {
+        "tags": ["Usuários"],
         "description": "",
         "parameters": [
           {
@@ -91,6 +100,7 @@
         }
       },
       "put": {
+        "tags": ["Usuários"],
         "description": "",
         "parameters": [
           {
@@ -143,6 +153,7 @@
         }
       },
       "delete": {
+        "tags": ["Usuários"],
         "description": "",
         "parameters": [
           {
@@ -167,6 +178,7 @@
     },
     "/spaces": {
       "get": {
+        "tags": ["Espaços"],
         "description": "",
         "responses": {
           "200": {
@@ -178,6 +190,7 @@
         }
       },
       "post": {
+        "tags": ["Espaços"],
         "description": "",
         "responses": {
           "201": {
@@ -191,6 +204,7 @@
     },
     "/spaces/{id}": {
       "get": {
+        "tags": ["Espaços"],
         "description": "",
         "parameters": [
           {
@@ -213,6 +227,7 @@
         }
       },
       "put": {
+        "tags": ["Espaços"],
         "description": "",
         "parameters": [
           {
@@ -235,6 +250,7 @@
         }
       },
       "delete": {
+        "tags": ["Espaços"],
         "description": "",
         "parameters": [
           {
@@ -259,6 +275,7 @@
     },
     "/rentals": {
       "get": {
+        "tags": ["Aluguéis"],
         "description": "",
         "responses": {
           "200": {
@@ -270,6 +287,7 @@
         }
       },
       "post": {
+        "tags": ["Aluguéis"],
         "description": "",
         "responses": {
           "201": {
@@ -283,6 +301,7 @@
     },
     "/rentals/{id}": {
       "get": {
+        "tags": ["Aluguéis"],
         "description": "",
         "parameters": [
           {
@@ -305,6 +324,7 @@
         }
       },
       "put": {
+        "tags": ["Aluguéis"],
         "description": "",
         "parameters": [
           {
@@ -327,6 +347,7 @@
         }
       },
       "delete": {
+        "tags": ["Aluguéis"],
         "description": "",
         "parameters": [
           {
@@ -351,6 +372,7 @@
     },
     "/contracts": {
       "get": {
+        "tags": ["Contratos"],
         "description": "",
         "responses": {
           "200": {
@@ -362,6 +384,7 @@
         }
       },
       "post": {
+        "tags": ["Contratos"],
         "description": "",
         "responses": {
           "201": {
@@ -375,6 +398,7 @@
     },
     "/contracts/{id}": {
       "get": {
+        "tags": ["Contratos"],
         "description": "",
         "parameters": [
           {
@@ -397,6 +421,7 @@
         }
       },
       "put": {
+        "tags": ["Contratos"],
         "description": "",
         "parameters": [
           {
@@ -419,6 +444,7 @@
         }
       },
       "delete": {
+        "tags": ["Contratos"],
         "description": "",
         "parameters": [
           {
@@ -443,6 +469,7 @@
     },
     "/payments": {
       "get": {
+        "tags": ["Pagamentos"],
         "description": "",
         "responses": {
           "200": {
@@ -454,6 +481,7 @@
         }
       },
       "post": {
+        "tags": ["Pagamentos"],
         "description": "",
         "responses": {
           "201": {
@@ -467,6 +495,7 @@
     },
     "/payments/{id}": {
       "get": {
+        "tags": ["Pagamentos"],
         "description": "",
         "parameters": [
           {
@@ -489,6 +518,7 @@
         }
       },
       "put": {
+        "tags": ["Pagamentos"],
         "description": "",
         "parameters": [
           {
@@ -511,6 +541,7 @@
         }
       },
       "delete": {
+        "tags": ["Pagamentos"],
         "description": "",
         "parameters": [
           {
@@ -535,6 +566,7 @@
     },
     "/invoices": {
       "get": {
+        "tags": ["Faturas"],
         "description": "",
         "responses": {
           "200": {
@@ -546,6 +578,7 @@
         }
       },
       "post": {
+        "tags": ["Faturas"],
         "description": "",
         "responses": {
           "201": {
@@ -559,6 +592,7 @@
     },
     "/invoices/{id}": {
       "get": {
+        "tags": ["Faturas"],
         "description": "",
         "parameters": [
           {
@@ -581,6 +615,7 @@
         }
       },
       "put": {
+        "tags": ["Faturas"],
         "description": "",
         "parameters": [
           {
@@ -603,6 +638,7 @@
         }
       },
       "delete": {
+        "tags": ["Faturas"],
         "description": "",
         "parameters": [
           {
