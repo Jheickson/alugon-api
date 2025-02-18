@@ -2,14 +2,19 @@ const pool = require("./connection");
 
 // Buscar todos os espaços
 const getAll = async () => {
-  const [rows] = await pool.query("SELECT * FROM espaco");
+  const [rows] = await pool.query(
+    "SELECT espaco.*, usuario.nome AS responsavel_nome FROM espaco INNER JOIN usuario ON espaco.responsavel = usuario.id"
+  );
   return rows;
 };
 
 // Buscar espaço por ID
 const getById = async (id) => {
-  const [rows] = await pool.query("SELECT * FROM espaco WHERE id = ?", [id]);
-  return rows[0] || null;
+  const [rows] = await pool.query(
+    "SELECT espaco.*, usuario.nome AS responsavel_nome FROM espaco INNER JOIN usuario ON espaco.responsavel = usuario.id WHERE espaco.id = ?",
+    [id]
+  );
+  return rows[0] || null;  
 };
 
 // Criar novo espaço
