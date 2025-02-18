@@ -7,27 +7,24 @@ const login = async (req, res) => {
   const email = req.body.email;
   const password = req.body.senha;
   try {
-    console.log("entrou");
     const user = await usersModel.getByEmail(email);
     if (!user) {
       return res.status(404).json({ error: "Usuário não encontrado!" });
     }
-    const senhaHash = await bcrypt.hash(user.senha, 10);
-    console.log(senhaHash);
-    console.log(password);
-    const validPassword = await bcrypt.compare(password, senhaHash);
-    console.log(validPassword)
+    const senhaHash = await bcrypt.hash(password, 10);
+
+    const validPassword = await bcrypt.compare(password, user.senha);
+
     if (!validPassword) {
       return res.status(401).json({ error: "Senha incorreta!" });
     }
-
+  
     const token = jwt.sign({ id: user.id, email: user.email }, "secret_key", { expiresIn: "1h" });
-    console.log(token);
-    res.status(200).json({ token });
+
+    res.status(200).json({ user, token });;
   
   } catch (error) {
-    
-    console.log(error)
+    console.log(error);
     res.status(500).json({ error: "Erro no servidor!" });
   }
 };
@@ -44,6 +41,7 @@ const getAll = async (req, res) => {
 
 // Criar um novo usuário
 const create = async (req, res) => {
+  console.log(req.body);
   try {
     const { CPF, nome, data_nascimento, telefone, email, senha } = req.body;
 
@@ -62,6 +60,7 @@ const create = async (req, res) => {
 
     // Criar o usuário
     const novoUsuario = await usersModel.create(req.body);
+    console.log("Reposta: ", res.body);
     res.status(201).json(novoUsuario);
   } catch (error) {
     console.error("Erro ao criar usuário:", error);
