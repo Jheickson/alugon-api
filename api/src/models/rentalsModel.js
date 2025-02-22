@@ -28,9 +28,12 @@ const create = async (rental) => {
     locatario,
     encerrado,
     observacao,
+    contrato_id, // Deveria ser enviado corretamente no body da requisição
   } = rental;
+
+  // Verificar se todas as colunas e valores estão sendo passados corretamente
   const [result] = await pool.query(
-    "INSERT INTO aluguel (espaco_id, locador, data_inicio, data_fim, valor_total, locatario, encerrado, observacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    "INSERT INTO aluguel (espaco_id, locador, data_inicio, data_fim, valor_total, locatario, encerrado, observacao, contrato_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
     [
       espaco_id,
       locador,
@@ -40,6 +43,7 @@ const create = async (rental) => {
       locatario,
       encerrado,
       observacao,
+      contrato_id,
     ]
   );
   return { id: result.insertId, ...rental };

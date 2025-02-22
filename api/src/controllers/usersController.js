@@ -11,24 +11,36 @@ const login = async(req, res) => {
         if (!user) {
             return res.status(404).json({ error: "Usuário não encontrado!" });
         }
-        const senhaHash = await bcrypt.hash(password, 10);
 
+        // Comparando a senha fornecida com a armazenada
         const validPassword = await bcrypt.compare(password, user.senha);
 
         if (!validPassword) {
             return res.status(401).json({ error: "Senha incorreta!" });
         }
 
+        // Verificando se a foto está no formato correto (Base64)
+        const fotoBase64 = user.foto ? user.foto.toString("base64") : null;
+
+        // Gerar o token
         const token = jwt.sign({ id: user.id, email: user.email }, "secret_key", {
             expiresIn: "1h",
         });
 
-        res.status(200).json({ user, token });
+        // Enviar resposta com a foto em base64
+        res.status(200).json({ 
+            user: {
+                ...user,
+                foto: fotoBase64, // Adicionando foto como base64
+            },
+            token 
+        });
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: "Erro no servidor!" });
     }
 };
+
 
 // Listar todos os usuários
 const getAll = async(req, res) => {
@@ -41,41 +53,46 @@ const getAll = async(req, res) => {
 };
 
 // Criar um novo usuário
-const create = async(req, res) => {
+const create = async (req, res) => {
     console.log(req.body);
     try {
-        const { CPF, nome, data_nascimento, telefone, email, senha, foto } =
-        req.body;
-
-        // Validações
-        if (!CPF ||
-            !nome ||
-            !data_nascimento ||
-            !telefone ||
-            !email ||
-            !senha ||
-            !foto
-        ) {
-            return res
-                .status(400)
-                .json({ error: "Todos os campos são obrigatórios." });
-        }
-
-        // Validar formato da data
-        const parsedDate = parseISO(data_nascimento);
-        if (!isValid(parsedDate) || isFuture(parsedDate)) {
-            return res.status(400).json({ error: "Data de nascimento inválida." });
-        }
-
-        // Criar o usuário
-        const novoUsuario = await usersModel.create(req.body);
-        console.log("Reposta: ", res.body);
-        res.status(201).json(novoUsuario);
+      const { CPF, nome, data_nascimento, telefone, email, senha, foto } = req.body;
+  
+      // Validações
+      if (!CPF || !nome || !data_nascimento || !telefone || !email || !senha || !foto) {
+        return res.status(400).json({ error: "Todos os campos são obrigatórios." });
+      }
+  
+      // Validar formato da data
+      const parsedDate = parseISO(data_nascimento);
+      if (!isValid(parsedDate) || isFuture(parsedDate)) {
+        return res.status(400).json({ error: "Data de nascimento inválida." });
+      }
+  
+      // Decodificar a imagem base64
+      let fotoBuffer = null;
+      if (foto.startsWith("data:image")) {
+        fotoBuffer = Buffer.from(foto.split(",")[1], "base64"); // Remove o prefixo e decodifica em buffer
+      }
+  
+      // Criar o usuário
+      const novoUsuario = await usersModel.create({
+        CPF,
+        nome,
+        data_nascimento,
+        telefone,
+        email,
+        senha,
+        foto: fotoBuffer, // Armazena a foto como buffer no banco de dados
+      });
+  
+      res.status(201).json(novoUsuario);
     } catch (error) {
-        console.error("Erro ao criar usuário:", error);
-        res.status(500).json({ error: "Erro ao criar usuário." });
+      console.error("Erro ao criar usuário:", error);
+      res.status(500).json({ error: "Erro ao criar usuário." });
     }
-};
+  };
+  
 
 // Buscar usuário por ID
 const getById = async(req, res) => {

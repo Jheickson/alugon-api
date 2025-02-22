@@ -31,12 +31,13 @@ const create = async (contract) => {
     aluguel_id,
   } = contract;
   const [result] = await pool.query(
-    "INSERT INTO contrato (data_assinatura, data_venc, status, observacao, condicoes_pagamento, multa, aluguel_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    "INSERT INTO contrato (data_assinatura, data_venc, status, observacao, modelo_pagamento, condicoes_pagamento, multa, aluguel_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
     [
       data_assinatura,
       data_venc,
       status,
       observacao,
+      modelo_pagamento,
       condicoes_pagamento,
       multa,
       aluguel_id,
@@ -52,17 +53,19 @@ const update = async (id, contract) => {
     data_venc,
     status,
     observacao,
+    modelo_pagamento,
     condicoes_pagamento,
     multa,
     aluguel_id,
   } = contract;
   const [result] = await pool.query(
-    "UPDATE contrato SET data_assinatura = ?, data_venc = ?, status = ?, observacao = ?, condicoes_pagamento = ?, multa = ?, aluguel_id = ? WHERE id = ?",
+    "UPDATE contrato SET data_assinatura = ?, data_venc = ?, status = ?, observacao = ?, modelo_pagamento = ?, condicoes_pagamento = ?, multa = ?, aluguel_id = ? WHERE id = ?",
     [
       data_assinatura,
       data_venc,
       status,
       observacao,
+      modelo_pagamento,
       condicoes_pagamento,
       multa,
       aluguel_id,

@@ -1,4 +1,5 @@
 const rentalsModel = require("../models/rentalsModel");
+const contractsModel = require("../models/contractsModel");
 
 // Listar todos os aluguéis
 const getAll = async (req, res) => {
@@ -26,12 +27,35 @@ const getById = async (req, res) => {
 // Criar um novo aluguel
 const create = async (req, res) => {
   try {
-    const newRental = await rentalsModel.create(req.body);
-    res.status(201).json(newRental);
+    // Extrair dados do corpo da requisição
+    const rentalData = {
+      ...req.body,
+      encerrado: 0,  // Valor fixo para a coluna 'encerrado' como 0
+    };
+
+    // Verificar se o contrato existe
+    const contractId = rentalData.contrato_id;  // O contrato selecionado no formulário
+    
+    const contract = await contractsModel.getById(contractId);
+    
+    if (!contract) {
+      return res.status(400).json({ error: "Contrato selecionado não encontrado." });
+    }
+
+    // Criar o aluguel com o contrato selecionado
+    const newRental = await rentalsModel.create(rentalData); // Criação do aluguel
+    
+    // Resposta de sucesso
+    res.status(201).json({
+      aluguel: newRental,
+    });
   } catch (error) {
+    console.error("Erro ao criar aluguel:", error);
     res.status(500).json({ error: "Erro ao criar aluguel." });
   }
 };
+
+
 
 // Atualizar um aluguel
 const update = async (req, res) => {
