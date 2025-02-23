@@ -29,6 +29,8 @@ cd api
 Execute o script para criar os certificados necessários:
 
 ```bash
+# Use o git bash para executar os proximos comandos
+
 # Navegue até a pasta /api
 cd api
 
