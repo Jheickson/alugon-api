@@ -28,9 +28,8 @@ cd api
 ### 3. Gerar Certificados SSL Autoassinados
 Execute o script para criar os certificados necessários:
 
+#### Use o git bash para executar nos comandos abaixo
 ```bash
-# Use o git bash para executar os proximos comandos
-
 # Navegue até a pasta /api
 cd api
 
