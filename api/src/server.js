@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3333;
 // Caminho corrigido usando path.join()
 const options = {
   key: fs.readFileSync(path.join(__dirname, "../ssl/server.key")), // ../ sobe da pasta "src" para "api"
-  cert: fs.readFileSync(path.join(__dirname, "../ssl/server.cert")),
+  cert: fs.readFileSync(path.join(__dirname, "../ssl/server.crt")),
 };
 
 // Cria servidor HTTPS

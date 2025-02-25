@@ -24,6 +24,27 @@ const getById = async (req, res) => {
   }
 };
 
+
+// Buscar aluguel por ID
+const getByTenantId = async (req, res) => {
+  try {
+    const rentals = await rentalsModel.getByTenantId(req.params.id);
+    res.json(rentals);
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao buscar aluguéis." });
+  }
+};
+
+const getByOwnerId = async (req, res) => {
+  try {
+    const rentals = await rentalsModel.getByOwnerId(req.params.id);
+    res.json(rentals);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Erro ao buscar aluguéis." });
+  }
+};
+
 // Criar um novo aluguel
 const create = async (req, res) => {
   try {
@@ -40,7 +61,7 @@ const create = async (req, res) => {
     
     if (!contract) {
       return res.status(400).json({ error: "Contrato selecionado não encontrado." });
-    }
+   }
 
     // Criar o aluguel com o contrato selecionado
     const newRental = await rentalsModel.create(rentalData); // Criação do aluguel
@@ -83,4 +104,4 @@ const remove = async (req, res) => {
   }
 };
 
-module.exports = { getAll, getById, create, update, remove };
+module.exports = { getAll, getById, getByTenantId, getByOwnerId, create, update, remove };

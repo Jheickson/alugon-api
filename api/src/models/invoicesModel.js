@@ -17,6 +17,13 @@ const getById = async (id) => {
   }
 };
 
+
+const getByUserId = async(id) => {
+  const [rows] = await pool.query(
+    "SELECT fatura.*, usuario.id AS responsavel_id FROM fatura INNER JOIN aluguel ON fatura.aluguel_id = aluguel.id INNER JOIN espaco ON aluguel.espaco_id = espaco.id INNER JOIN usuario ON espaco.responsavel = usuario.id WHERE usuario.id = ?", id);
+  return rows;
+};
+
 // Criar nova fatura
 const create = async (invoice) => {
   const {
@@ -80,4 +87,4 @@ const remove = async (id) => {
   return result.affectedRows > 0;
 };
 
-module.exports = { getAll, getById, create, update, remove };
+module.exports = { getAll, getById, getByUserId, create, update, remove };

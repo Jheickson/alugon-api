@@ -23,6 +23,16 @@ const getById = async(req, res) => {
     }
 };
 
+const getByUserId = async(req, res) => {
+    try {
+        const spaces = await spacesModel.getByUserId(req.params.id);
+        //console.log(spaces);
+        res.json(spaces);
+    } catch (error) {
+        res.status(500).json({ error: "Erro ao buscar espaços." });
+    }
+};
+
 // Criar um novo espaço
 const create = async(req, res) => {
     try {
@@ -59,4 +69,4 @@ const remove = async(req, res) => {
     }
 };
 
-module.exports = { getAll, getById, create, update, remove };
+module.exports = { getAll, getById, getByUserId, create, update, remove };

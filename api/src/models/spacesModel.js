@@ -16,6 +16,13 @@ const getById = async(id) => {
     return rows[0] || null;
 };
 
+const getByUserId = async(id) => {
+    const [rows] = await pool.query(
+        "SELECT espaco.*, usuario.id AS responsavel_id FROM espaco INNER JOIN usuario ON espaco.responsavel = usuario.id WHERE usuario.id = ?", [id]
+    );
+    return rows;
+};
+
 // Criar novo espaço
 const create = async(space) => {
     const { numero, disponivel, descricao, valor, responsavel, imagem } = space;
@@ -40,4 +47,4 @@ const remove = async(id) => {
     return result.affectedRows > 0;
 };
 
-module.exports = { getAll, getById, create, update, remove };
+module.exports = { getAll, getById, getByUserId, create, update, remove };

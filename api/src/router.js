@@ -19,6 +19,7 @@ router.delete("/users/:id", usersController.remove);
 // Spaces, espaço
 router.get("/spaces", spacesController.getAll);
 router.get("/spaces/:id", spacesController.getById);
+router.get("/spaces/user/:id", spacesController.getByUserId);
 router.post("/spaces", spacesController.create);
 router.put("/spaces/:id", spacesController.update);
 router.delete("/spaces/:id", spacesController.remove);
@@ -26,6 +27,8 @@ router.delete("/spaces/:id", spacesController.remove);
 // Rentals, aluguel
 router.get("/rentals", rentalController.getAll);
 router.get("/rentals/:id", rentalController.getById);
+router.get("/rentals/owner/:id", rentalController.getByOwnerId);
+router.get("/rentals/tenant/:id", rentalController.getByTenantId);
 router.post("/rentals", rentalController.create);
 router.put("/rentals/:id", rentalController.update);
 router.delete("/rentals/:id", rentalController.remove);
@@ -47,6 +50,7 @@ router.delete("/payments/:id", paymentController.remove);
 // Invoices, fatura
 router.get("/invoices", invoiceController.getAll);
 router.get("/invoices/:id", invoiceController.getById);
+router.get("/invoices/user/:id", invoiceController.getByUserId);
 router.post("/invoices", invoiceController.create);
 router.put("/invoices/:id", invoiceController.update);
 router.delete("/invoices/:id", invoiceController.remove);

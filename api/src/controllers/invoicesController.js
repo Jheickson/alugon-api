@@ -25,6 +25,17 @@ const getById = async (req, res) => {
   }
 };
 
+const getByUserId = async(req, res) => {
+    try {
+        const invoices = await invoicesModel.getByUserId(req.params.id);
+        console.log(invoices);
+        res.json(invoices);
+    } catch (error) {
+      console.log(error);
+        res.status(500).json({ error: "Erro ao buscar faturas." });
+    }
+};
+
 // Criar uma nova fatura
 const create = async (req, res) => {
   try {
@@ -64,4 +75,4 @@ const remove = async (req, res) => {
   }
 };
 
-module.exports = { getAll, getById, create, update, remove };
+module.exports = { getAll, getById, getByUserId, create, update, remove };
