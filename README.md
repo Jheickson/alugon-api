@@ -4,6 +4,8 @@ Esta API foi desenvolvida com Node.js, Express e MySQL para espaços de alugavei
 
 link do frontend: https://github.com/correaisaac/alugon-app
 
+link do vídeo no YouTube: https://youtu.be/yeE5d3cDP10
+
 ## Objetivo
 
 Aqui ficara a API que fara a conexão do FrontEnd com o BackEnd
@@ -66,7 +68,7 @@ A API estará acessível em:
 
 ---
 
-### ⚠️ Aviso de Certificado Autoassinado
+### Aviso de Certificado Autoassinado
 Seu navegador ou cliente HTTP (ex: Postman) exibirá um aviso de segurança.  
 Para prosseguir em **localhost**:
 - **Chrome/Firefox**: Clique em "Avançado" > "Continuar para o site".
@@ -74,7 +76,7 @@ Para prosseguir em **localhost**:
 
 ---
 
-### 🛠️ Script generate-cert.sh (Para Referência)
+### Script generate-cert.sh (Para Referência)
 ```bash
 #!/bin/bash
 
@@ -87,4 +89,7 @@ openssl req -nodes -new -x509 -keyout "$SSL_DIR/server.key" -out "$SSL_DIR/serve
 
 echo "Certificados gerados em: $SSL_DIR/"
 ```
+
+## Notas importantes
+26/02/2025 - Infelizmente não conseguimos concluir o projeto, ficaram faltando algumas funções, se tivermos a oportunidade, iremos concluir ele.
 
