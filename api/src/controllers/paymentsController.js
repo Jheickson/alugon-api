@@ -1,5 +1,7 @@
 const paymentsModel = require("../models/paymentsModel");
 
+
+
 // Listar todos os pagamentos
 const getAll = async (req, res) => {
   try {
@@ -18,26 +20,39 @@ const getById = async (req, res) => {
     if (!payment) {
       return res.status(404).json({ error: "Pagamento não encontrado." });
     }
-    res.status(200).json(payment);
+
+    // Retorna o pagamento, incluindo o boleto como base64 para exibição ou download
+    const boletoPdfBase64 = payment.boleto_pdf ? payment.boleto_pdf.toString('base64') : null;
+    res.status(200).json({
+      ...payment,
+      boleto_pdf: boletoPdfBase64
+    });
   } catch (error) {
     console.error("Erro ao buscar pagamento:", error);
     res.status(500).json({ error: "Erro ao buscar pagamento." });
   }
 };
 
+
 // Criar um novo pagamento
 const create = async (req, res) => {
   try {
-    const newPayment = await paymentsModel.create(req.body);
-    res.status(201).json(newPayment);
+    const { num_transacao, fatura_id } = req.body;
+    const payment = { num_transacao, fatura_id };
+
+    const createdPayment = await paymentsModel.create(payment);
+    res.status(200).json({ id: createdPayment.id });
   } catch (error) {
     console.error("Erro ao criar pagamento:", error);
-    res.status(500).json({ error: "Erro ao criar pagamento." });
+    res.status(500).json({ error: "Erro ao processar pagamento." });
   }
 };
 
+
+
 // Atualizar um pagamento
 const update = async (req, res) => {
+  console.log("Update");
   try {
     const updated = await paymentsModel.update(req.params.id, req.body);
     if (!updated) {

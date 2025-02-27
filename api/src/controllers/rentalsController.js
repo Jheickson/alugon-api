@@ -5,8 +5,10 @@ const contractsModel = require("../models/contractsModel");
 const getAll = async (req, res) => {
   try {
     const rentals = await rentalsModel.getAll();
+    
     res.json(rentals);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Erro ao buscar aluguéis." });
   }
 };
@@ -27,8 +29,10 @@ const getById = async (req, res) => {
 
 // Buscar aluguel por ID
 const getByTenantId = async (req, res) => {
+  console.log("Entrou aqui");
   try {
     const rentals = await rentalsModel.getByTenantId(req.params.id);
+    
     res.json(rentals);
   } catch (error) {
     res.status(500).json({ error: "Erro ao buscar aluguéis." });
@@ -87,6 +91,7 @@ const update = async (req, res) => {
     }
     res.json({ message: "Aluguel atualizado com sucesso." });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Erro ao atualizar aluguel." });
   }
 };
@@ -94,12 +99,14 @@ const update = async (req, res) => {
 // Deletar um aluguel
 const remove = async (req, res) => {
   try {
+    
     const deleted = await rentalsModel.remove(req.params.id);
     if (!deleted) {
       return res.status(404).json({ error: "Aluguel não encontrado." });
     }
     res.json({ message: "Aluguel removido com sucesso." });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Erro ao remover aluguel." });
   }
 };

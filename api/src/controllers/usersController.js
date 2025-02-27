@@ -54,12 +54,11 @@ const getAll = async(req, res) => {
 
 // Criar um novo usuário
 const create = async (req, res) => {
-    console.log(req.body);
     try {
-      const { CPF, nome, data_nascimento, telefone, email, senha, foto } = req.body;
+      const { CPF, nome, data_nascimento, telefone, email, senha, foto, conta, agencia } = req.body;
   
       // Validações
-      if (!CPF || !nome || !data_nascimento || !telefone || !email || !senha || !foto) {
+      if (!CPF || !nome || !data_nascimento || !telefone || !email || !senha || !foto || !conta || !agencia) {
         return res.status(400).json({ error: "Todos os campos são obrigatórios." });
       }
   
@@ -84,6 +83,8 @@ const create = async (req, res) => {
         email,
         senha,
         foto: fotoBuffer, // Armazena a foto como buffer no banco de dados
+        conta,
+        agencia
       });
   
       res.status(201).json(novoUsuario);
@@ -113,7 +114,7 @@ const getById = async(req, res) => {
 const update = async(req, res) => {
     try {
         const { id } = req.params;
-        const { CPF, nome, data_nascimento, telefone, email, senha, foto } =
+        const { CPF, nome, data_nascimento, telefone, email, senha, foto, conta, agencia } =
         req.body;
 
         // Validações
@@ -123,7 +124,9 @@ const update = async(req, res) => {
             !telefone ||
             !email ||
             !senha ||
-            !foto
+            !foto ||
+            !conta ||
+            !agencia
         ) {
             return res
                 .status(400)

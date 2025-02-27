@@ -20,7 +20,7 @@ const getById = async (id) => {
 
 const getByUserId = async(id) => {
   const [rows] = await pool.query(
-    "SELECT fatura.*, usuario.id AS responsavel_id FROM fatura INNER JOIN aluguel ON fatura.aluguel_id = aluguel.id INNER JOIN espaco ON aluguel.espaco_id = espaco.id INNER JOIN usuario ON espaco.responsavel = usuario.id WHERE usuario.id = ?", id);
+    "SELECT fatura.*, usuario.id AS locatario_id FROM fatura INNER JOIN aluguel ON fatura.aluguel_id = aluguel.id INNER JOIN usuario ON aluguel.locatario = usuario.id WHERE usuario.id = ?;", id);
   return rows;
 };
 
@@ -34,10 +34,9 @@ const create = async (invoice) => {
     descontos,
     imposto,
     aluguel_id,
-    pagamento_id,
   } = invoice;
   const [result] = await pool.query(
-    "INSERT INTO fatura (valor, data_emissao, data_venc, status, descontos, imposto, aluguel_id, pagamento_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    "INSERT INTO fatura (valor, data_emissao, data_venc, status, descontos, imposto, aluguel_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     [
       valor,
       data_emissao,
@@ -46,7 +45,6 @@ const create = async (invoice) => {
       descontos,
       imposto,
       aluguel_id,
-      pagamento_id,
     ]
   );
   return { id: result.insertId, ...invoice };
@@ -62,10 +60,9 @@ const update = async (id, invoice) => {
     descontos,
     imposto,
     aluguel_id,
-    pagamento_id,
   } = invoice;
   const [result] = await pool.query(
-    "UPDATE fatura SET valor = ?, data_emissao = ?, data_venc = ?, status = ?, descontos = ?, imposto = ?, aluguel_id = ?, pagamento_id = ? WHERE id = ?",
+    "UPDATE fatura SET valor = ?, data_emissao = ?, data_venc = ?, status = ?, descontos = ?, imposto = ?, aluguel_id = ? WHERE id = ?",
     [
       valor,
       data_emissao,
@@ -74,7 +71,6 @@ const update = async (id, invoice) => {
       descontos,
       imposto,
       aluguel_id,
-      pagamento_id,
       id,
     ]
   );

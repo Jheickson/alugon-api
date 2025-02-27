@@ -16,7 +16,7 @@ const getAll = async() => {
 
 // Criar novo usuário
 const create = async(usuario) => {
-    const { CPF, nome, data_nascimento, telefone, email, senha, foto } = usuario;
+    const { CPF, nome, data_nascimento, telefone, email, senha, foto, conta, agencia } = usuario;
 
     // Verificar se já existe um usuário com o mesmo email ou CPF
     const [existingUsers] = await pool.query(
@@ -32,7 +32,7 @@ const create = async(usuario) => {
 
     // Inserir novo usuário
     const [result] = await pool.query(
-        "INSERT INTO usuario (CPF, nome, data_nascimento, telefone, email, senha, foto) VALUES (?, ?, ?, ?, ?, ?, ?)", [CPF, nome, data_nascimento, telefone, email, senhaHash, foto]
+        "INSERT INTO usuario (CPF, nome, data_nascimento, telefone, email, senha, foto, conta, agencia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [CPF, nome, data_nascimento, telefone, email, senhaHash, foto, conta, agencia]
     );
     return {
         id: result.insertId,
@@ -42,15 +42,17 @@ const create = async(usuario) => {
         telefone,
         email,
         foto,
+        conta,
+        agencia
     };
 };
 
 // Atualizar usuário por ID
 const update = async(id, usuario) => {
-    const { CPF, nome, data_nascimento, telefone, email, senha, foto } = usuario;
+    const { CPF, nome, data_nascimento, telefone, email, senha, foto, conta, agencia } = usuario;
     usuario.senha = await bcrypt.hash(usuario.senha, 10);
     const [result] = await pool.query(
-        "UPDATE usuario SET CPF = ?, nome = ?, data_nascimento = ?, telefone = ?, email = ?, senha = ?, foto = ? WHERE id = ?", [CPF, nome, data_nascimento, telefone, email, senha, foto, id]
+        "UPDATE usuario SET CPF = ?, nome = ?, data_nascimento = ?, telefone = ?, email = ?, senha = ?, foto = ?, conta = ?, agencia = ? WHERE id = ?", [CPF, nome, data_nascimento, telefone, email, senha, foto, conta, agencia, id]
     );
     return result.affectedRows > 0;
 };

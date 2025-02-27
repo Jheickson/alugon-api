@@ -28,7 +28,6 @@ const getById = async (req, res) => {
 const getByUserId = async(req, res) => {
     try {
         const invoices = await invoicesModel.getByUserId(req.params.id);
-        console.log(invoices);
         res.json(invoices);
     } catch (error) {
       console.log(error);
