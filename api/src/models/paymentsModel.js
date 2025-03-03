@@ -22,33 +22,68 @@ const getById = async (id) => {
 const create = async (payment) => {
   const { num_transacao, fatura_id } = payment;
 
-  const doc = new PDFDocument();
-  const chunks = [];
+  const generatePDF = async (db, pagamento_id) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const [rows] = await db.execute(
+          `SELECT u.conta, u.agencia 
+           FROM pagamento p
+           JOIN fatura f ON p.fatura_id = f.id
+           JOIN aluguel a ON f.aluguel_id = a.id
+           JOIN usuario u ON a.locatario = u.id
+           WHERE p.id = ?`,
+          [pagamento_id]
+        );
 
-  doc.on('data', chunk => chunks.push(chunk));
-  doc.on('end', async () => {
-    const boletoPdf = Buffer.concat(chunks); // Gera o buffer do boleto em PDF
+        if (rows.length === 0) {
+          return reject(new Error("Pagamento não encontrado"));
+        }
 
-    try {
-      const [result] = await pool.query(
-        "INSERT INTO pagamento (num_transacao, fatura_id, boleto_pdf) VALUES (?, ?, ?)",
-        [num_transacao, fatura_id, boletoPdf]
-      );
+        const { conta, agencia } = rows[0];
 
-      return { id: result.insertId, ...payment };
-    } catch (error) {
-      console.error("Erro ao criar pagamento:", error);
-      throw new Error("Erro ao processar pagamento.");
-    }
-  });
+        const doc = new PDFDocument();
+        const chunks = [];
 
-  // Gerando o conteúdo do boleto (exemplo)
-  doc.fontSize(12).text('Boleto de Pagamento');
-  doc.text(`ID da Fatura: ${fatura_id}`);
-  doc.text(`Número da Transação: ${num_transacao}`);
-  doc.text(`Valor: R$ 100.00`);
-  doc.end();
+        doc.on("data", (chunk) => chunks.push(chunk));
+        doc.on("end", () => resolve(Buffer.concat(chunks)));
+        doc.on("error", (err) => reject(err));
+
+        // Gerando o conteúdo do boleto
+        doc.fontSize(12).text("Boleto de Pagamento");
+        doc.text(`ID do Pagamento: ${pagamento_id}`);
+        doc.text(`Conta: ${conta}`);
+        doc.text(`Agência: ${agencia}`);
+        doc.text(`Valor: R$ 100.00`);
+
+        doc.end();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  };
+
+  try {
+    const [result] = await pool.query(
+      "INSERT INTO pagamento (num_transacao, fatura_id) VALUES (?, ?)",
+      [num_transacao, fatura_id]
+    );
+
+    const pagamento_id = result.insertId;
+    const boletoPdf = await generatePDF(pool, pagamento_id);
+
+    await pool.query(
+      "UPDATE pagamento SET boleto_pdf = ? WHERE id = ?",
+      [boletoPdf, pagamento_id]
+    );
+
+    return { id: pagamento_id, ...payment };
+  } catch (error) {
+    console.error("Erro ao criar pagamento:", error);
+    throw new Error("Erro ao processar pagamento.");
+  }
 };
+
+
 
 
 
@@ -69,7 +104,6 @@ const update = async (id, payment) => {
   );
   return result.affectedRows > 0;
 };
-
 // Deletar pagamento por ID
 const remove = async (id) => {
   const [result] = await pool.query("DELETE FROM pagamento WHERE id = ?", [id]);

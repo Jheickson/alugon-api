@@ -29,7 +29,6 @@ const getById = async (req, res) => {
 
 // Buscar aluguel por ID
 const getByTenantId = async (req, res) => {
-  console.log("Entrou aqui");
   try {
     const rentals = await rentalsModel.getByTenantId(req.params.id);
     

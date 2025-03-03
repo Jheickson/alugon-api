@@ -5,17 +5,17 @@ const getAll = async (req, res) => {
     try {
         const spaces = await spacesModel.getAll();
         const result = spaces.map(space => {
-            // Converte a imagem para base64, caso exista
             const fotoBase64 = space.imagem ? space.imagem.toString("base64") : null;
             
             return {
                 ...space,
-                fotoBase64 // Adiciona o campo fotoBase64 ao objeto retornado
+                imagem: fotoBase64 
             };
         });
 
         res.json(result);
     } catch (error) {
+        console.log(error);
         res.status(500).json({ error: "Erro ao buscar espaços." });
     }
 };
@@ -25,29 +25,47 @@ const getById = async(req, res) => {
     try {
         const space = await spacesModel.getById(req.params.id);
         if (!space) {
+            
+            console.log("Não encontrado");
             return res.status(404).json({ error: "Espaço não encontrado." });
         }
-        res.json(space);
+        const fotoBase64 = space.imagem ? space.imagem.toString("base64") : null;
+        res.status(200).json({ 
+                ...space,
+                imagem: fotoBase64, 
+        });
     } catch (error) {
         res.status(500).json({ error: "Erro ao buscar espaço." });
     }
 };
 
-const getByUserId = async(req, res) => {
+
+const getByUserId = async (req, res) => {
     try {
         const spaces = await spacesModel.getByUserId(req.params.id);
-        //console.log(spaces);
-        res.json(spaces);
+
+        const spacesComImagens = spaces.map(space => ({
+            ...space,
+            imagem: space.imagem ? space.imagem.toString("base64") : null,
+        }));
+
+        res.status(200).json(spacesComImagens);
     } catch (error) {
+        console.error("Erro ao buscar espaços:", error);
         res.status(500).json({ error: "Erro ao buscar espaços." });
     }
 };
 
-// Criar um novo espaço
+
+
 const create = async(req, res) => {
     try {
         const { numero, disponivel, descricao, valor, responsavel, imagem, cidade, bairro } = req.body;
 
+        let fotoBuffer = null;
+        if (imagem.startsWith("data:image")) {
+            fotoBuffer = Buffer.from(imagem.split(",")[1], "base64"); 
+        }
         
         const newSpace = await spacesModel.create(
             {
@@ -56,7 +74,7 @@ const create = async(req, res) => {
                 descricao,
                 valor: parseFloat(valor),
                 responsavel,
-                imagem,
+                imagem: fotoBuffer,
                 cidade,
                 bairro,
             }
@@ -69,10 +87,8 @@ const create = async(req, res) => {
 };
 
 // Atualizar um espaço
-// Atualizar um espaço
 const update = async (req, res) => {
     try {
-        console.log(req.body);
         const { numero, disponivel, descricao, valor, responsavel, imagem, cidade, bairro } = req.body;
 
         let fotoBuffer = null;
@@ -82,7 +98,7 @@ const update = async (req, res) => {
 
         const updated = await spacesModel.update(req.params.id, {
             numero,
-            disponivel,
+            disponivel: 1,
             descricao,
             valor,
             responsavel,

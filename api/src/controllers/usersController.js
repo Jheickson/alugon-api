@@ -12,26 +12,21 @@ const login = async(req, res) => {
             return res.status(404).json({ error: "Usuário não encontrado!" });
         }
 
-        // Comparando a senha fornecida com a armazenada
         const validPassword = await bcrypt.compare(password, user.senha);
 
         if (!validPassword) {
             return res.status(401).json({ error: "Senha incorreta!" });
         }
 
-        // Verificando se a foto está no formato correto (Base64)
         const fotoBase64 = user.foto ? user.foto.toString("base64") : null;
 
-        // Gerar o token
         const token = jwt.sign({ id: user.id, email: user.email }, "secret_key", {
             expiresIn: "1h",
         });
-
-        // Enviar resposta com a foto em base64
         res.status(200).json({ 
             user: {
                 ...user,
-                foto: fotoBase64, // Adicionando foto como base64
+                foto: fotoBase64,
             },
             token 
         });
@@ -71,7 +66,7 @@ const create = async (req, res) => {
       // Decodificar a imagem base64
       let fotoBuffer = null;
       if (foto.startsWith("data:image")) {
-        fotoBuffer = Buffer.from(foto.split(",")[1], "base64"); // Remove o prefixo e decodifica em buffer
+        fotoBuffer = Buffer.from(foto.split(",")[1], "base64"); 
       }
   
       // Criar o usuário
@@ -82,7 +77,7 @@ const create = async (req, res) => {
         telefone,
         email,
         senha,
-        foto: fotoBuffer, // Armazena a foto como buffer no banco de dados
+        foto: fotoBuffer, 
         conta,
         agencia
       });
@@ -100,22 +95,22 @@ const getById = async(req, res) => {
     try {
         const usuario = await usersModel.getById(req.params.id);
         if (!usuario) {
-            console.error("Usuário não encontrado."); // Adicione logs aqui
+            console.error("Usuário não encontrado."); 
             return res.status(404).json({ error: "Usuário não encontrado." });
         }
         res.json(usuario);
     } catch (error) {
-        console.error("Erro no getById:", error); // Adicione logs para capturar o erro
+        console.error("Erro no getById:", error); 
         res.status(500).json({ error: "Erro ao buscar usuário." });
     }
 };
 
 // Atualizar um usuário existente
-const update = async(req, res) => {
+const update = async (req, res) => {
     try {
         const { id } = req.params;
         const { CPF, nome, data_nascimento, telefone, email, senha, foto, conta, agencia } =
-        req.body;
+            req.body;
 
         // Validações
         if (!CPF ||
@@ -139,8 +134,26 @@ const update = async(req, res) => {
             return res.status(400).json({ error: "Data de nascimento inválida." });
         }
 
+        let fotoBuffer = null;
+        if (foto.startsWith("data:image")) {
+            fotoBuffer = Buffer.from(foto.split(",")[1], "base64"); 
+        }
+
+        // Atribuir os dados ao objeto de atualização
+        const updatedData = {
+            CPF,
+            nome,
+            data_nascimento: parsedDate,
+            telefone,
+            email,
+            senha,
+            foto: fotoBuffer, // Adicionando o buffer da foto
+            conta,
+            agencia
+        };
+
         // Atualizar o usuário
-        const atualizado = await usersModel.update(id, req.body);
+        const atualizado = await usersModel.update(id, updatedData);
         if (!atualizado) {
             return res.status(404).json({ error: "Usuário não encontrado." });
         }
@@ -151,6 +164,7 @@ const update = async(req, res) => {
         res.status(500).json({ error: "Erro ao atualizar usuário." });
     }
 };
+
 
 // Deletar um usuário
 const remove = async(req, res) => {

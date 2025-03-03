@@ -41,6 +41,7 @@ const create = async (req, res) => {
     const payment = { num_transacao, fatura_id };
 
     const createdPayment = await paymentsModel.create(payment);
+    console.log(createdPayment);
     res.status(200).json({ id: createdPayment.id });
   } catch (error) {
     console.error("Erro ao criar pagamento:", error);

@@ -90,6 +90,3 @@ openssl req -nodes -new -x509 -keyout "$SSL_DIR/server.key" -out "$SSL_DIR/serve
 echo "Certificados gerados em: $SSL_DIR/"
 ```
 
-## Notas importantes
-26/02/2025 - Infelizmente não conseguimos concluir o projeto, ficaram faltando algumas funções, se tivermos a oportunidade, iremos concluir ele.
-

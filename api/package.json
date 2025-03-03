@@ -29,6 +29,7 @@
     "selfsigned": "^2.4.1",
     "stripe": "^17.7.0",
     "swagger-autogen": "^2.23.7",
+    "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "whatwg-url": "^14.1.1"
   },

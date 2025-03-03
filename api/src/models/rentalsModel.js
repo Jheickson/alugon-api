@@ -12,7 +12,7 @@ const getById = async (id) => {
     const [rows] = await pool.query("SELECT * FROM aluguel WHERE id = ? AND encerrado = 0", [id]);
     return rows[0] || null;
   } catch (error) {
-    console.error("Erro na query getById:", error); // Log para identificar erros
+    console.error("Erro na query getById:", error); 
     throw error;
   }
 };
@@ -22,7 +22,7 @@ const getByTenantId = async (id) => {
     const [rows] = await pool.query("SELECT a.*, b.nome AS locatario FROM aluguel a INNER JOIN usuario b ON a.locatario = b.id WHERE a.locatario = ? AND a.encerrado = 0", [id]);
     return rows;
   } catch (error) {
-    console.error("Erro na query getByTenantId:", error); // Log para identificar erros
+    console.error("Erro na query getByTenantId:", error); 
     throw error;
   }
 };
@@ -32,7 +32,7 @@ const getByOwnerId = async (id) => {
     const [rows] = await pool.query("SELECT a.*, b.nome AS locador, c.nome AS locatario FROM aluguel a INNER JOIN usuario b ON a.locador = b.id INNER JOIN usuario c ON a.locatario = c.id WHERE a.locador = ? AND a.encerrado = 0", [id]);
     return rows;
   } catch (error) {
-    console.error("Erro na query getByOwnerId:", error); // Log para identificar erros
+    console.error("Erro na query getByOwnerId:", error); 
     throw error;
   }
 };
@@ -49,10 +49,9 @@ const create = async (rental) => {
     encerrado,
     status,
     observacao,
-    contrato_id, // Deveria ser enviado corretamente no body da requisição
+    contrato_id,
   } = rental;
 
-  // Verificar se todas as colunas e valores estão sendo passados corretamente
   const [result] = await pool.query(
     "INSERT INTO aluguel (espaco_id, locador, data_inicio, data_fim, valor_total, locatario, encerrado, status, observacao, contrato_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     [
