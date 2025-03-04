@@ -4,7 +4,7 @@ Esta API foi desenvolvida com Node.js, Express e MySQL para espaços de alugavei
 
 link do frontend: https://github.com/correaisaac/alugon-app
 
-link do vídeo no YouTube: https://youtu.be/yeE5d3cDP10
+link do vídeo no YouTube: [https://youtu.be/yeE5d3cDP10](https://youtu.be/Z0-nsDJiA1Q)
 
 ## Objetivo
 
