@@ -4,7 +4,76 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const validarCPF = require("../Utils/validaCpf");
 
-const login = async(req, res) => {
+// Função auxiliar para validação
+const validarDadosUsuario = (dadosUsuario) => {
+  const erros = {};
+  
+  if (!dadosUsuario.CPF) {
+    erros.CPF = "CPF é obrigatório";
+  } else if (!validarCPF(dadosUsuario.CPF)) {
+    erros.CPF = "CPF inválido";
+  }
+
+  if (!dadosUsuario.nome) {
+    erros.nome = "Nome é obrigatório";
+  } else if (dadosUsuario.nome.length < 3) {
+    erros.nome = "Nome deve ter pelo menos 3 caracteres";
+  }
+
+  if (!dadosUsuario.data_nascimento) {
+    erros.data_nascimento = "Data de nascimento é obrigatória";
+  } else {
+    const dataFormatada = parseISO(dadosUsuario.data_nascimento);
+    if (!isValid(dataFormatada)) {
+      erros.data_nascimento = "Data inválida";
+    } else if (isFuture(dataFormatada)) {
+      erros.data_nascimento = "Data não pode ser no futuro";
+    }
+  }
+
+  if (!dadosUsuario.telefone) {
+    erros.telefone = "Telefone é obrigatório";
+  } else if (dadosUsuario.telefone.length < 10) {
+    erros.telefone = "Telefone inválido";
+  }
+
+  if (!dadosUsuario.email) {
+    erros.email = "Email é obrigatório";
+  } else if (!/^\S+@\S+\.\S+$/.test(dadosUsuario.email)) {
+    erros.email = "Email inválido";
+  }
+
+  if (!dadosUsuario.senha) {
+    erros.senha = "Senha é obrigatória";
+  } else if (dadosUsuario.senha.length < 6) {
+    erros.senha = "Senha deve ter pelo menos 6 caracteres";
+  }
+
+  if (!dadosUsuario.foto) {
+    erros.foto = "Foto é obrigatória";
+  } else if (!dadosUsuario.foto.startsWith("data:image")) {
+    erros.foto = "Formato de imagem inválido";
+  }
+
+  if (!dadosUsuario.conta) {
+    erros.conta = "Número da conta é obrigatório";
+  }else if (!/^\d{1,10}(-\d{1})?$/.test(dadosUsuario.conta)) {
+    erros.conta = "Formato de conta inválido. Use: 12345 ou 12345-6";
+  } else if (dadosUsuario.conta.replace(/-/g, '').length > 10) {
+    erros.conta = "Conta bancária não pode ter mais de 10 dígitos";
+  }
+
+  if (!dadosUsuario.agencia) {
+    erros.agencia = "Agência é obrigatória";
+  } else if (!/^\d{4}$/.test(dadosUsuario.agencia)) {
+    erros.agencia = "Agência deve ter exatamente 4 dígitos numéricos";
+  }
+
+  return erros;
+};
+
+// Login do usuário
+const login = async (req, res) => {
     const email = req.body.email;
     const password = req.body.senha;
     try {
@@ -37,9 +106,8 @@ const login = async(req, res) => {
     }
 };
 
-
 // Listar todos os usuários
-const getAll = async(req, res) => {
+const getAll = async (req, res) => {
     try {
         const usuarios = await usersModel.getAll();
         res.json(usuarios);
@@ -51,31 +119,22 @@ const getAll = async(req, res) => {
 // Criar um novo usuário
 const create = async (req, res) => {
   try {
+    const errosValidacao = validarDadosUsuario(req.body);
+    
+    if (Object.keys(errosValidacao).length > 0) {
+      return res.status(400).json({ 
+        error: "Erro de validação",
+        errors: errosValidacao 
+      });
+    }
+
     const { CPF, nome, data_nascimento, telefone, email, senha, foto, conta, agencia } = req.body;
 
-    // Validações
-    if (!CPF || !nome || !data_nascimento || !telefone || !email || !senha || !foto || !conta || !agencia) {
-      return res.status(400).json({ error: "Todos os campos são obrigatórios." });
-    }
-
-    // Validar CPF
-    if (!validarCPF(CPF)) {
-      return res.status(400).json({ error: "CPF inválido." });
-    }
-
-    // Validar formato da data
-    const parsedDate = parseISO(data_nascimento);
-    if (!isValid(parsedDate) || isFuture(parsedDate)) {
-      return res.status(400).json({ error: "Data de nascimento inválida." });
-    }
-
-    // Decodificar imagem
     let fotoBuffer = null;
     if (foto.startsWith("data:image")) {
       fotoBuffer = Buffer.from(foto.split(",")[1], "base64");
     }
 
-    // Criar usuário
     const novoUsuario = await usersModel.create({
       CPF,
       nome,
@@ -91,20 +150,30 @@ const create = async (req, res) => {
     res.status(201).json(novoUsuario);
   } catch (error) {
     console.error("Erro ao criar usuário:", error);
+    if (error.message.includes("já cadastrado")) {
+      return res.status(400).json({ 
+        error: error.message,
+        field: error.message.includes("email") ? "email" : "CPF"
+      });
+    }
     res.status(500).json({ error: "Erro ao criar usuário." });
   }
 };
-  
 
 // Buscar usuário por ID
-const getById = async(req, res) => {
+const getById = async (req, res) => {
     try {
         const usuario = await usersModel.getById(req.params.id);
         if (!usuario) {
             console.error("Usuário não encontrado."); 
             return res.status(404).json({ error: "Usuário não encontrado." });
         }
-        res.json(usuario);
+        
+        const fotoBase64 = usuario.foto ? usuario.foto.toString("base64") : null;
+        res.json({
+            ...usuario,
+            foto: fotoBase64
+        });
     } catch (error) {
         console.error("Erro no getById:", error); 
         res.status(500).json({ error: "Erro ao buscar usuário." });
@@ -115,21 +184,16 @@ const getById = async(req, res) => {
 const update = async (req, res) => {
   try {
     const { id } = req.params;
+    const errosValidacao = validarDadosUsuario(req.body);
+    
+    if (Object.keys(errosValidacao).length > 0) {
+      return res.status(400).json({ 
+        error: "Erro de validação",
+        errors: errosValidacao 
+      });
+    }
+
     const { CPF, nome, data_nascimento, telefone, email, senha, foto, conta, agencia } = req.body;
-
-    if (!CPF || !nome || !data_nascimento || !telefone || !email || !senha || !foto || !conta || !agencia) {
-      return res.status(400).json({ error: "Todos os campos são obrigatórios." });
-    }
-
-    // Validar CPF
-    if (!validarCPF(CPF)) {
-      return res.status(400).json({ error: "CPF inválido." });
-    }
-
-    const parsedDate = parseISO(data_nascimento);
-    if (!isValid(parsedDate) || isFuture(parsedDate)) {
-      return res.status(400).json({ error: "Data de nascimento inválida." });
-    }
 
     let fotoBuffer = null;
     if (foto.startsWith("data:image")) {
@@ -139,7 +203,7 @@ const update = async (req, res) => {
     const updatedData = {
       CPF,
       nome,
-      data_nascimento: parsedDate,
+      data_nascimento,
       telefone,
       email,
       senha,
@@ -160,9 +224,8 @@ const update = async (req, res) => {
   }
 };
 
-
 // Deletar um usuário
-const remove = async(req, res) => {
+const remove = async (req, res) => {
     try {
         const deletado = await usersModel.remove(req.params.id);
         if (!deletado) {
