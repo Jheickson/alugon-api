@@ -2,6 +2,7 @@ const { parseISO, isFuture, isValid } = require("date-fns");
 const usersModel = require("../models/usersModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const validarCPF = require("../Utils/validaCpf");
 
 const login = async(req, res) => {
     const email = req.body.email;
@@ -49,45 +50,50 @@ const getAll = async(req, res) => {
 
 // Criar um novo usuário
 const create = async (req, res) => {
-    try {
-      const { CPF, nome, data_nascimento, telefone, email, senha, foto, conta, agencia } = req.body;
-  
-      // Validações
-      if (!CPF || !nome || !data_nascimento || !telefone || !email || !senha || !foto || !conta || !agencia) {
-        return res.status(400).json({ error: "Todos os campos são obrigatórios." });
-      }
-  
-      // Validar formato da data
-      const parsedDate = parseISO(data_nascimento);
-      if (!isValid(parsedDate) || isFuture(parsedDate)) {
-        return res.status(400).json({ error: "Data de nascimento inválida." });
-      }
-  
-      // Decodificar a imagem base64
-      let fotoBuffer = null;
-      if (foto.startsWith("data:image")) {
-        fotoBuffer = Buffer.from(foto.split(",")[1], "base64"); 
-      }
-  
-      // Criar o usuário
-      const novoUsuario = await usersModel.create({
-        CPF,
-        nome,
-        data_nascimento,
-        telefone,
-        email,
-        senha,
-        foto: fotoBuffer, 
-        conta,
-        agencia
-      });
-  
-      res.status(201).json(novoUsuario);
-    } catch (error) {
-      console.error("Erro ao criar usuário:", error);
-      res.status(500).json({ error: "Erro ao criar usuário." });
+  try {
+    const { CPF, nome, data_nascimento, telefone, email, senha, foto, conta, agencia } = req.body;
+
+    // Validações
+    if (!CPF || !nome || !data_nascimento || !telefone || !email || !senha || !foto || !conta || !agencia) {
+      return res.status(400).json({ error: "Todos os campos são obrigatórios." });
     }
-  };
+
+    // Validar CPF
+    if (!validarCPF(CPF)) {
+      return res.status(400).json({ error: "CPF inválido." });
+    }
+
+    // Validar formato da data
+    const parsedDate = parseISO(data_nascimento);
+    if (!isValid(parsedDate) || isFuture(parsedDate)) {
+      return res.status(400).json({ error: "Data de nascimento inválida." });
+    }
+
+    // Decodificar imagem
+    let fotoBuffer = null;
+    if (foto.startsWith("data:image")) {
+      fotoBuffer = Buffer.from(foto.split(",")[1], "base64");
+    }
+
+    // Criar usuário
+    const novoUsuario = await usersModel.create({
+      CPF,
+      nome,
+      data_nascimento,
+      telefone,
+      email,
+      senha,
+      foto: fotoBuffer,
+      conta,
+      agencia
+    });
+
+    res.status(201).json(novoUsuario);
+  } catch (error) {
+    console.error("Erro ao criar usuário:", error);
+    res.status(500).json({ error: "Erro ao criar usuário." });
+  }
+};
   
 
 // Buscar usuário por ID
@@ -107,62 +113,51 @@ const getById = async(req, res) => {
 
 // Atualizar um usuário existente
 const update = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { CPF, nome, data_nascimento, telefone, email, senha, foto, conta, agencia } =
-            req.body;
+  try {
+    const { id } = req.params;
+    const { CPF, nome, data_nascimento, telefone, email, senha, foto, conta, agencia } = req.body;
 
-        // Validações
-        if (!CPF ||
-            !nome ||
-            !data_nascimento ||
-            !telefone ||
-            !email ||
-            !senha ||
-            !foto ||
-            !conta ||
-            !agencia
-        ) {
-            return res
-                .status(400)
-                .json({ error: "Todos os campos são obrigatórios." });
-        }
-
-        // Validar formato da data
-        const parsedDate = parseISO(data_nascimento);
-        if (!isValid(parsedDate) || isFuture(parsedDate)) {
-            return res.status(400).json({ error: "Data de nascimento inválida." });
-        }
-
-        let fotoBuffer = null;
-        if (foto.startsWith("data:image")) {
-            fotoBuffer = Buffer.from(foto.split(",")[1], "base64"); 
-        }
-
-        // Atribuir os dados ao objeto de atualização
-        const updatedData = {
-            CPF,
-            nome,
-            data_nascimento: parsedDate,
-            telefone,
-            email,
-            senha,
-            foto: fotoBuffer, // Adicionando o buffer da foto
-            conta,
-            agencia
-        };
-
-        // Atualizar o usuário
-        const atualizado = await usersModel.update(id, updatedData);
-        if (!atualizado) {
-            return res.status(404).json({ error: "Usuário não encontrado." });
-        }
-
-        res.json({ message: "Usuário atualizado com sucesso." });
-    } catch (error) {
-        console.error("Erro ao atualizar usuário:", error);
-        res.status(500).json({ error: "Erro ao atualizar usuário." });
+    if (!CPF || !nome || !data_nascimento || !telefone || !email || !senha || !foto || !conta || !agencia) {
+      return res.status(400).json({ error: "Todos os campos são obrigatórios." });
     }
+
+    // Validar CPF
+    if (!validarCPF(CPF)) {
+      return res.status(400).json({ error: "CPF inválido." });
+    }
+
+    const parsedDate = parseISO(data_nascimento);
+    if (!isValid(parsedDate) || isFuture(parsedDate)) {
+      return res.status(400).json({ error: "Data de nascimento inválida." });
+    }
+
+    let fotoBuffer = null;
+    if (foto.startsWith("data:image")) {
+      fotoBuffer = Buffer.from(foto.split(",")[1], "base64");
+    }
+
+    const updatedData = {
+      CPF,
+      nome,
+      data_nascimento: parsedDate,
+      telefone,
+      email,
+      senha,
+      foto: fotoBuffer,
+      conta,
+      agencia
+    };
+
+    const atualizado = await usersModel.update(id, updatedData);
+    if (!atualizado) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+
+    res.json({ message: "Usuário atualizado com sucesso." });
+  } catch (error) {
+    console.error("Erro ao atualizar usuário:", error);
+    res.status(500).json({ error: "Erro ao atualizar usuário." });
+  }
 };
 
 
