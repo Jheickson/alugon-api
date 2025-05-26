@@ -4,7 +4,44 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const validarCPF = require("../Utils/validaCpf");
 
-// Função auxiliar para validação
+const recoveryCodes = {};
+
+const recoverAccount = async (req, res) => {
+  const { email } = req.body;
+  const user = await usersModel.findByEmail(email);
+  if (!user) {
+    return res.status(404).json({ error: "Email não encontrado" });
+  }
+
+  const code = Math.floor(10000 + Math.random() * 90000).toString();
+  recoveryCodes[email] = code;
+  console.log(`🔒 Código de recuperação para ${email}: ${code}`);
+
+  return res.status(200).json({ message: "Código de recuperação gerado" });
+};
+
+const verifyRecoveryCode = (req, res) => {
+  const { email, code } = req.body;
+  if (recoveryCodes[email] === code) {
+    return res.status(200).json({ message: "Código válido" });
+  }
+  return res.status(400).json({ error: "Código inválido" });
+};
+
+const resetPassword = async (req, res) => {
+  const { email, code, newPassword } = req.body;
+  if (recoveryCodes[email] !== code) {
+    return res.status(400).json({ error: "Código inválido" });
+  }
+
+  const bcrypt = require("bcryptjs");
+  const hashed = bcrypt.hashSync(newPassword, 8);
+  await usersModel.updateByEmail(email, { senha: hashed });
+
+  delete recoveryCodes[email];
+  return res.status(200).json({ message: "Senha atualizada com sucesso" });
+};
+
 const validarDadosUsuario = (dadosUsuario) => {
   const erros = {};
 
@@ -241,4 +278,8 @@ const remove = async (req, res) => {
   }
 };
 
-module.exports = { getAll, getById, create, update, remove, login };
+module.exports = {
+  getAll, getById, create, update, remove, login, recoverAccount,
+  verifyRecoveryCode,
+  resetPassword,
+};

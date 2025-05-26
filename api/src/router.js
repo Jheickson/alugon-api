@@ -56,4 +56,8 @@ router.put("/invoices/:id", invoiceController.update);
 router.delete("/invoices/:id", invoiceController.remove);
 router.post("/login", usersController.login);
 
+router.post("/recuperar", usersController.recoverAccount);
+router.post("/recuperar/verificar", usersController.verifyRecoveryCode);
+router.post("/recuperar/reset", usersController.resetPassword);
+
 module.exports = router;

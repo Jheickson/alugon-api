@@ -104,4 +104,15 @@ const getById = async (id) => {
   }
 };
 
-module.exports = { getAll, create, update, remove, getById, getByEmail };
+async function findByEmail(email) {
+  const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
+  return rows[0];
+}
+
+async function updateByEmail(email, data) {
+  const fields = Object.keys(data).map(f => `${f} = ?`).join(",");
+  const values = Object.values(data);
+  await pool.query(`UPDATE users SET ${fields} WHERE email = ?`, [...values, email]);
+}
+
+module.exports = { getAll, create, update, remove, getById, getByEmail, findByEmail, updateByEmail };
