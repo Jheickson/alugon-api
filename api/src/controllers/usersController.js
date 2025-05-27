@@ -7,7 +7,7 @@ const validarCPF = require("../Utils/validaCpf");
 // Função auxiliar para validação
 const validarDadosUsuario = (dadosUsuario) => {
   const erros = {};
-  
+
   if (!dadosUsuario.CPF) {
     erros.CPF = "CPF é obrigatório";
   } else if (!validarCPF(dadosUsuario.CPF)) {
@@ -23,11 +23,15 @@ const validarDadosUsuario = (dadosUsuario) => {
   if (!dadosUsuario.data_nascimento) {
     erros.data_nascimento = "Data de nascimento é obrigatória";
   } else {
-    const dataFormatada = parseISO(dadosUsuario.data_nascimento);
-    if (!isValid(dataFormatada)) {
+    try {
+      const dataFormatada = parseISO(dadosUsuario.data_nascimento);
+      if (!isValid(dataFormatada)) {
+        erros.data_nascimento = "Data inválida";
+      } else if (isFuture(dataFormatada)) {
+        erros.data_nascimento = "Data não pode ser no futuro";
+      }
+    } catch {
       erros.data_nascimento = "Data inválida";
-    } else if (isFuture(dataFormatada)) {
-      erros.data_nascimento = "Data não pode ser no futuro";
     }
   }
 
@@ -43,21 +47,21 @@ const validarDadosUsuario = (dadosUsuario) => {
     erros.email = "Email inválido";
   }
 
-  if (!dadosUsuario.senha) {
+  if (!dadosUsuario.senha && !dadosUsuario.id) { // Para update sem senha
     erros.senha = "Senha é obrigatória";
-  } else if (dadosUsuario.senha.length < 6) {
+  } else if (dadosUsuario.senha && dadosUsuario.senha.length < 6) {
     erros.senha = "Senha deve ter pelo menos 6 caracteres";
   }
 
   if (!dadosUsuario.foto) {
     erros.foto = "Foto é obrigatória";
-  } else if (!dadosUsuario.foto.startsWith("data:image")) {
+  } else if (typeof dadosUsuario.foto !== "string" || !dadosUsuario.foto.startsWith("data:image")) {
     erros.foto = "Formato de imagem inválido";
   }
 
   if (!dadosUsuario.conta) {
     erros.conta = "Número da conta é obrigatório";
-  }else if (!/^\d{1,10}(-\d{1})?$/.test(dadosUsuario.conta)) {
+  } else if (!/^\d{1,10}(-\d{1})?$/.test(dadosUsuario.conta)) {
     erros.conta = "Formato de conta inválido. Use: 12345 ou 12345-6";
   } else if (dadosUsuario.conta.replace(/-/g, '').length > 10) {
     erros.conta = "Conta bancária não pode ter mais de 10 dígitos";
@@ -74,66 +78,66 @@ const validarDadosUsuario = (dadosUsuario) => {
 
 // Login do usuário
 const login = async (req, res) => {
-    const email = req.body.email;
-    const password = req.body.senha;
-    try {
-        const user = await usersModel.getByEmail(email);
-        if (!user) {
-            return res.status(404).json({ error: "Usuário não encontrado!" });
-        }
-
-        const validPassword = await bcrypt.compare(password, user.senha);
-
-        if (!validPassword) {
-            return res.status(401).json({ error: "Senha incorreta!" });
-        }
-
-        const fotoBase64 = user.foto ? user.foto.toString("base64") : null;
-
-        const token = jwt.sign({ id: user.id, email: user.email }, "secret_key", {
-            expiresIn: "1h",
-        });
-        res.status(200).json({ 
-            user: {
-                ...user,
-                foto: fotoBase64,
-            },
-            token 
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: "Erro no servidor!" });
+  const { email, senha } = req.body;
+  try {
+    const user = await usersModel.getByEmail(email);
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado!" });
     }
+
+    const validPassword = await bcrypt.compare(senha, user.senha);
+    if (!validPassword) {
+      return res.status(401).json({ error: "Senha incorreta!" });
+    }
+
+    const fotoBase64 = user.foto ? user.foto.toString("base64") : null;
+
+    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET || "secret_key", {
+      expiresIn: "1h",
+    });
+
+    res.status(200).json({
+      user: {
+        ...user,
+        foto: fotoBase64,
+      },
+      token,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro no servidor!" });
+  }
 };
 
 // Listar todos os usuários
 const getAll = async (req, res) => {
-    try {
-        const usuarios = await usersModel.getAll();
-        res.json(usuarios);
-    } catch (error) {
-        res.status(500).json({ error: "Erro ao buscar usuários." });
-    }
+  try {
+    const usuarios = await usersModel.getAll();
+    const usuariosComFoto = usuarios.map((u) => ({
+      ...u,
+      foto: u.foto ? u.foto.toString("base64") : null,
+    }));
+    res.json(usuariosComFoto);
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao buscar usuários." });
+  }
 };
 
 // Criar um novo usuário
 const create = async (req, res) => {
   try {
     const errosValidacao = validarDadosUsuario(req.body);
-    
+
     if (Object.keys(errosValidacao).length > 0) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: "Erro de validação",
-        errors: errosValidacao 
+        errors: errosValidacao,
       });
     }
 
     const { CPF, nome, data_nascimento, telefone, email, senha, foto, conta, agencia } = req.body;
 
-    let fotoBuffer = null;
-    if (foto.startsWith("data:image")) {
-      fotoBuffer = Buffer.from(foto.split(",")[1], "base64");
-    }
+    const fotoBuffer = Buffer.from(foto.split(",")[1], "base64");
 
     const novoUsuario = await usersModel.create({
       CPF,
@@ -144,16 +148,16 @@ const create = async (req, res) => {
       senha,
       foto: fotoBuffer,
       conta,
-      agencia
+      agencia,
     });
 
     res.status(201).json(novoUsuario);
   } catch (error) {
     console.error("Erro ao criar usuário:", error);
     if (error.message.includes("já cadastrado")) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: error.message,
-        field: error.message.includes("email") ? "email" : "CPF"
+        field: error.message.includes("email") ? "email" : "CPF",
       });
     }
     res.status(500).json({ error: "Erro ao criar usuário." });
@@ -162,43 +166,39 @@ const create = async (req, res) => {
 
 // Buscar usuário por ID
 const getById = async (req, res) => {
-    try {
-        const usuario = await usersModel.getById(req.params.id);
-        if (!usuario) {
-            console.error("Usuário não encontrado."); 
-            return res.status(404).json({ error: "Usuário não encontrado." });
-        }
-        
-        const fotoBase64 = usuario.foto ? usuario.foto.toString("base64") : null;
-        res.json({
-            ...usuario,
-            foto: fotoBase64
-        });
-    } catch (error) {
-        console.error("Erro no getById:", error); 
-        res.status(500).json({ error: "Erro ao buscar usuário." });
+  try {
+    const usuario = await usersModel.getById(req.params.id);
+    if (!usuario) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
     }
+
+    const fotoBase64 = usuario.foto ? usuario.foto.toString("base64") : null;
+    res.json({
+      ...usuario,
+      foto: fotoBase64,
+    });
+  } catch (error) {
+    console.error("Erro no getById:", error);
+    res.status(500).json({ error: "Erro ao buscar usuário." });
+  }
 };
 
 // Atualizar um usuário existente
 const update = async (req, res) => {
   try {
     const { id } = req.params;
-    const errosValidacao = validarDadosUsuario(req.body);
-    
+    const errosValidacao = validarDadosUsuario({ ...req.body, id }); // Adiciona id para ignorar senha obrigatória
+
     if (Object.keys(errosValidacao).length > 0) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: "Erro de validação",
-        errors: errosValidacao 
+        errors: errosValidacao,
       });
     }
 
     const { CPF, nome, data_nascimento, telefone, email, senha, foto, conta, agencia } = req.body;
 
-    let fotoBuffer = null;
-    if (foto.startsWith("data:image")) {
-      fotoBuffer = Buffer.from(foto.split(",")[1], "base64");
-    }
+    const fotoBuffer = Buffer.from(foto.split(",")[1], "base64");
 
     const updatedData = {
       CPF,
@@ -206,11 +206,15 @@ const update = async (req, res) => {
       data_nascimento,
       telefone,
       email,
-      senha,
       foto: fotoBuffer,
       conta,
-      agencia
+      agencia,
     };
+
+    // Só hash se senha foi enviada
+    if (senha) {
+      updatedData.senha = senha;
+    }
 
     const atualizado = await usersModel.update(id, updatedData);
     if (!atualizado) {
@@ -226,15 +230,15 @@ const update = async (req, res) => {
 
 // Deletar um usuário
 const remove = async (req, res) => {
-    try {
-        const deletado = await usersModel.remove(req.params.id);
-        if (!deletado) {
-            return res.status(404).json({ error: "Usuário não encontrado." });
-        }
-        res.json({ message: "Usuário removido com sucesso." });
-    } catch (error) {
-        res.status(500).json({ error: "Erro ao remover usuário." });
+  try {
+    const deletado = await usersModel.remove(req.params.id);
+    if (!deletado) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
     }
+    res.json({ message: "Usuário removido com sucesso." });
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao remover usuário." });
+  }
 };
 
 module.exports = { getAll, getById, create, update, remove, login };
